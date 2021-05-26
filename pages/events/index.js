@@ -1,4 +1,6 @@
+import Head from "next/head";
 import { useRouter } from "next/router";
+import { Fragment } from "react";
 
 import EventList from "../../components/events/EventList";
 import EventsSearch from "../../components/events/EventsSearch";
@@ -11,10 +13,17 @@ const AllEventsPage = ({ allEvents }) => {
     router.push(`/events/${year}/${month}`);
   };
   return (
-    <div>
+    <Fragment>
+      <Head>
+        <title>All Events</title>
+        <meta
+          name="description"
+          content="Find a lot of great events that allow you to evolve..."
+        />
+      </Head>
       <EventsSearch onSearch={findEventsHandler} />
       <EventList items={allEvents} />
-    </div>
+    </Fragment>
   );
 };
 
