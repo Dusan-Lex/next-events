@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { connectDatabase, insertDocument } from "../../helpers/db-util";
 
 const handler = async (req, res) => {
   if (req.method === "POST") {
@@ -7,14 +7,23 @@ const handler = async (req, res) => {
       res.status(422).json({ message: "Invalid email address" });
       return;
     }
-    const client = await MongoClient.connect(
-      "mongodb+srv://Lex:NiKa2019@cluster0.vn6er.mongodb.net/events?retryWrites=true&w=majority",
-      { useUnifiedTopology: true }
-    );
-    const db = client.db();
-    await db.collection("newsletter").insertOne({ email: userEmail });
-    client.close();
-    console.log(userEmail);
+
+    let client;
+    try {
+      client = await connectDatabase();
+    } catch (error) {
+      res.status(500).json({ message: "Connecting to the database failded" });
+      return;
+    }
+
+    try {
+      await insertDocument(client, "newsletter", { email: userEmail });
+      client.close();
+    } catch (error) {
+      res.status(500).json({ message: "Inserting data failded" });
+      return;
+    }
+
     res.status(201).json({ message: "Signed up" });
   }
 };

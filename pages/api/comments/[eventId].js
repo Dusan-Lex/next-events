@@ -1,10 +1,18 @@
-import { MongoClient } from "mongodb";
+import {
+  connectDatabase,
+  getAllDocuments,
+  insertDocument,
+} from "../../../helpers/db-util";
+
 const handler = async (req, res) => {
   const eventId = req.query.eventId;
-  const client = await MongoClient.connect(
-    "mongodb+srv://Lex:NiKa2019@cluster0.vn6er.mongodb.net/events?retryWrites=true&w=majority",
-    { useUnifiedTopology: true }
-  );
+  let client;
+  try {
+    client = await connectDatabase();
+  } catch (error) {
+    res.status(500).json({ message: "Connecting to the database failed" });
+    return;
+  }
 
   if (req.method === "POST") {
     const { email, name, text } = req.body;
@@ -16,24 +24,26 @@ const handler = async (req, res) => {
       text.trim() === ""
     ) {
       res.status(422).json({ message: "Invalid input!" });
+      client.close();
       return;
     }
     const newComment = { eventId, email, name, text };
-    const db = client.db();
-    const result = await db.collection("comments").insertOne(newComment);
-
-    res.status(201).json({ message: "Added comment", comment: newComment });
+    let result;
+    try {
+      result = await insertDocument(client, "comments", newComment);
+      res.status(201).json({ message: "Added comment", comment: newComment });
+    } catch (error) {
+      res.status(500).json({ message: "Inserting comment failed!" });
+    }
   }
 
   if (req.method === "GET") {
-    const db = client.db();
-    const documents = await db
-      .collection("comments")
-      .find({ eventId })
-      .sort({ _id: -1 })
-      .toArray();
-
-    res.status(200).json({ comments: documents });
+    try {
+      const documents = await getAllDocuments(client, "comments", eventId);
+      res.status(200).json({ comments: documents });
+    } catch (error) {
+      res.status(500).json({ message: "Getting comments failed!" });
+    }
   }
   client.close();
 };
