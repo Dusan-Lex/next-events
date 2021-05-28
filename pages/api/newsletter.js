@@ -8,11 +8,11 @@ const handler = async (req, res) => {
       return;
     }
     const client = await MongoClient.connect(
-      "mongodb+srv://Lex:NiKa2019@cluster0.vn6er.mongodb.net/newsletter?retryWrites=true&w=majority",
+      "mongodb+srv://Lex:NiKa2019@cluster0.vn6er.mongodb.net/events?retryWrites=true&w=majority",
       { useUnifiedTopology: true }
     );
     const db = client.db();
-    await db.collection("emails").insertOne({ email: userEmail });
+    await db.collection("newsletter").insertOne({ email: userEmail });
     client.close();
     console.log(userEmail);
     res.status(201).json({ message: "Signed up" });
