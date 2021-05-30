@@ -1,5 +1,5 @@
 import { Fragment, useContext } from "react";
-import NotificationContext from "../../store/notification-contex";
+import NotificationContext from "../../store/notification-context";
 import Notification from "../ui/Notification";
 import MainHeader from "./MainHeader";
 
